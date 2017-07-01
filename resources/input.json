@@ -1,0 +1,122 @@
+[
+  {
+    "responseNumber": "1264",
+    "originalInvoiceNumber": "879755",
+    "status": "Rejected",
+    "date": "2016-10-14",
+    "amount": "2481.86",
+    "currency": "USD"
+  },
+  {
+    "responseNumber": "7789",
+    "originalInvoiceNumber": "198731",
+    "status": "Rejected",
+    "date": "2016-04-18",
+    "amount": "817.23",
+    "currency": "CAD"
+  },
+  {
+    "responseNumber": "15647",
+    "originalInvoiceNumber": "248164",
+    "status": "Pending",
+    "date": "2016-08-20",
+    "amount": "647.22",
+    "currency": "CAD"
+  },
+  {
+    "invoiceNumber": "16547",
+    "date": "2016-05-01",
+    "amount": "554.78",
+    "currency": "USD"
+  },
+  {
+    "invoiceNumber": "44977",
+    "date": "2016-07-19",
+    "amount": "915.7",
+    "currency": "CAD"
+  },
+  {
+    "responseNumber": "45746",
+    "originalInvoiceNumber": "4497",
+    "status": "Approved",
+    "date": "2015-12-01",
+    "amount": "45.57",
+    "currency": "USD"
+  },
+  {
+    "responseNumber": "54678",
+    "originalInvoiceNumber": "789154",
+    "status": "Approved",
+    "date": "2016-05-03",
+    "amount": "84.67",
+    "currency": "USD"
+  },
+  {
+    "responseNumber": "54987",
+    "originalInvoiceNumber": "224567",
+    "status": "Rejected",
+    "date": "2016-05-01",
+    "amount": "45.45",
+    "currency": "CAD"
+  },
+  {
+    "responseNumber": "56149",
+    "originalInvoiceNumber": "44977",
+    "status": "Paid",
+    "date": "2016-07-23",
+    "amount": "915.7",
+    "currency": "CAD"
+  },
+  {
+    "responseNumber": "114567",
+    "originalInvoiceNumber": "998755",
+    "status": "Paid",
+    "date": "2015-12-05",
+    "amount": "891.57",
+    "currency": "USD"
+  },
+  {
+    "responseNumber": "156724",
+    "originalInvoiceNumber": "789154",
+    "status": "Paid",
+    "date": "2016-05-21",
+    "amount": "84.67",
+    "currency": "USD"
+  },
+  {
+    "invoiceNumber": "224567",
+    "date": "2016-04-17",
+    "amount": "45.45",
+    "currency": "CAD"
+  },
+  {
+    "invoiceNumber": "248164",
+    "date": "2016-08-17",
+    "amount": "647.22",
+    "currency": "CAD"
+  },
+  {
+    "invoiceNumber": "261649",
+    "date": "2017-02-28",
+    "amount": "2195.21",
+    "currency": "CAD"
+  },
+  {
+    "invoiceNumber": "789154",
+    "date": "2016-05-01",
+    "amount": "84.67",
+    "currency": "USD"
+  },
+  {
+    "invoiceNumber": "879755",
+    "date": "2016-09-30",
+    "amount": "2481.86",
+    "currency": "USD"
+  },
+  {
+    "invoiceNumber": "998755",
+    "date": "2015-12-01",
+    "amount": "891.57",
+    "currency": "USD"
+  }
+]
