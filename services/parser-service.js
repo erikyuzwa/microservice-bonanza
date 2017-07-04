@@ -89,5 +89,5 @@ server.start((err) => {
         });
     });
 
-    console.log('Server running at:', server.info.uri);
+    console.log('parser microservice running at : ', server.info.uri);
 });

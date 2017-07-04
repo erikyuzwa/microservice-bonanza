@@ -1,17 +1,31 @@
 # microservice-bonanza
-microservice fun times with Express.
+microservice fun times.
 
-These are 4 seperate microservices written with Express to demonstrate one possible way to structure your pipeline.
+These are seperate microservices written to demonstrate one possible way to structure your pipeline. 
+
+* `collector-service` - this microservice accepts a JSON Object or Array via `POST`
+* `parser-service` - this microservice subscribes to our RabbitMQ for the `collectedInvoice` message
+* `persister-service` - this microservice subscribes to our RabbitMQ for the `parsedInvoice` message
+* `reporter-service` - this microservice listens for a `GET` request and will produce a JSON response
 
 # Getting Started
 
 * `git clone https://github.com/erikyuzwa/microservice-bonanza.git`
 * `npm install` or `yarn install`
 
+# Prerequisites
+
+* RabbitMQ
+* Redis
+
 # Configuration
 
 While "true" Microservices should require zero-configuration, there's always a case where your deployment network
-dictates some specifics.
+might dictate some constraints around what's available.
+
+# Running 
+
+* startup the microservices using `npm start` or `yarn start`
 
 
 # LICENSE

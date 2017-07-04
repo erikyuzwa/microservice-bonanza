@@ -13,7 +13,7 @@ const _ = require('lodash');
 const server = new Hapi.Server();
 server.connection({
     host: 'localhost',
-    port: 4000
+    port: 6000
 });
 
 server.register([
@@ -88,5 +88,5 @@ server.start((err) => {
         });
     });
 
-    console.log('Server running at:', server.info.uri);
+    console.log('reporter microservice running at : ', server.info.uri);
 });
