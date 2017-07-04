@@ -32,7 +32,7 @@ might dictate some constraints around what's available -- especially when ports 
 * `POST` the `./resources/input.json` to `http://servername:port/api/v1/collector` remembering to make sure that
   your `content-type` is set to `application/json`
   
-  [screenshot](./screenshot.png)
+  ![set your content-type](http://github.com/erikyuzwa/microservice-bonanza/blob/master/screenshot.png)
 
 # Running the unit tests
 
