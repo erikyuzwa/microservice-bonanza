@@ -71,17 +71,22 @@ server.start((err) => {
                         console.log('[persist] parsedInvoice - ', messageData);
                         mysql.pool.getConnection(function(err, connection) {
 
+                          // build our query - if our originalDocumentNumber and status are populated, then we're
+                          // working with a Response. Otherwise we have an Invoice
+                          let queryString;
+                          let queryParams = [messageData.documentNumber, messageData.date, messageData.amount, messageData.currency];
+                          if (_.has(messageData, 'status') || _.has(messageData, 'originalDocumentNumber')) {
+                              queryString = 'INSERT INTO responses (documentNumber, date, amount, currency, originalDocumentNumber, status) VALUES (?,?,?,?,?,?)';
+                              queryParams.push(messageData.originalDocumentNumber);
+                              queryParams.push(messageData.status);
+                          } else {
+                              queryString = 'INSERT INTO invoices (documentNumber, date, amount, currency) VALUES (?,?,?,?)';
+                          }
+
                           // Use the connection
                           connection.query(
-                            'INSERT INTO records (documentType, documentNumber, date, amount, currency, originalDocumentNumber, status) VALUES (?,?,?,?,?,?,?)',
-                            [messageData.documentType,
-                             messageData.documentNumber,
-                             messageData.date,
-                             messageData.amount,
-                             messageData.currency,
-                             messageData.originalDocumentNumber,
-                             messageData.status
-                            ],
+                            queryString,
+                            queryParams,
                             function(err, rows) {
 
                               if(err) {

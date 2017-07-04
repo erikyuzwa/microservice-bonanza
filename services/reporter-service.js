@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 /**
  * @name: reporter-service
- * @desc: this microservice starts up and listens for a GET `/api/v1/reporter?documentNumber` query. When that happens,
- *        pull all the records stored in our persistent storage and return a JSON object in the response.
- *
- *        When there is no `documentNumber` query param specified, then proceed to yank out the entire archive in
- *        the database backend.
+ * @desc: this microservice starts up and listens for a GET `/api/v1/reporter` query. When that happens,
+ *        pull all the records stored in our persistent storage and return a JSON object in the response
+ *        in the format:
+ *        [{'original': {}, 'responses': []}]
  *
  * @TODO:
  */
@@ -45,73 +44,88 @@ server.register([
 // Add the GET route
 server.route({
     method: 'GET',
-    path: config.api + '/reporter/{documentNumber?}',
+    path: config.api + '/reporter',
     handler: (request, reply) => {
 
       let mysql = server.plugins['hapi-mysql'];
-      let params = request.query;
       let status = 'ok';
-      let details;
+      let queryString;
+      let queryParams = [];
+      let data;
 
-      if (_.has(params, 'documentNumber')) {
+      queryString = 'SELECT "Invoice" as Type, documentNumber as invoiceNumber, documentNumber as docNumber, date, amount, currency, "" as status FROM invoices UNION SELECT "Response", originalDocumentNumber as invoiceNumber, documentNumber as docNumber, date, amount, currency, status FROM responses ORDER BY invoiceNumber, date';
 
-        let dn = params.documentNumber;
-        mysql.pool.getConnection(function(err, connection) {
+      console.log('[reporter-querystring] - %s', queryString);
 
-          // Since we have different snippets of data, let's be real fancy and structure our SQL to make use of a UNION
-          // the idea being that the first row returned will ALWAYS be our "Invoice" document...at least that's the idea
-          connection.query(
-            'SELECT * from records WHERE documentType = ? AND documentNumber = ? UNION SELECT * from records WHERE documentType = ? AND originalDocumentNumber = ? ORDER BY date',
-            ['Invoice', dn, 'Response', dn],
-            function(err, rows) {
+      mysql.pool.getConnection(function(err, connection) {
 
-              if (err) {
-                throw new Error(err);
-              }
+      connection.query(
+        queryString,
+        queryParams,
+        function(err, rows) {
 
-              //console.log(rows);
-              if (rows && rows.length) {
+          if (err) {
+            throw new Error(err);
+          }
 
-                // rows[0] is hopefully our 'Invoice' row, so let's peel that off
-                let head = rows.shift();
+          console.log(rows);
+          if (rows && rows.length) {
 
-                // shift will update our rows Array - but we also want to strip out the "id" column so let's
-                // use _.map to iterate each rowItem and _.omit() our column
-                let tail = _.map(rows, (rowItem) => {
-                    return _.omit(rowItem, 'id');
-                });
+            let head = {};
+            let tail = [];
+            data = [];
 
-                details = {
-                  original : {
+            _.each(rows, (row) => {
+
+                if (row['Type'] === 'Invoice') {
+
+                    if (!_.isEmpty(head) || tail.length) {
+                        data.push({
+                            original: head,
+                            responses: tail
+                        });
+                    }
+
+                    head = {
                       'documentType': 'Invoice',
-                      'documentNumber': dn,
-                      'date': head['date'],
-                      'amount': head['amount'],
-                      'currency': head['currency']
-                  },
-                  responses: tail
-                };
+                      'documentNumber': row['docNumber'],
+                      'date': row['date'],
+                      'amount': row['amount'],
+                      'currency': row['currency']
+                    };
 
-              } else {
-                status = 'error';
-                details = 'no matching record(s) found';
-              }
+                    tail = [];
+                } else if (row['Type'] === 'Response') {
+                    let item = {
+                        'documentType': 'Response',
+                        'documentNumber': row['docNumber'],
+                        'originalDocumentNumber': row['invoiceNumber'],
+                        'date': row['date'],
+                        'amount': row['amount'],
+                        'currency': row['currency'],
+                        'status': row['status']
+                    };
 
-              return reply({'status': status, 'details': details});
-            }
-          );
+                    tail.push(item);
+                }
 
-          // And done with the connection.
-          connection.release();
-        });
+            });
 
-      } else {
-        status = 'error';
-        details = 'invalid or missing query parameter documentNumber';
-        return reply({'status': status, 'details': details});
-      }
+          } else {
+            status = 'error';
+            data = 'no matching record(s) found';
+          }
 
-    }
+          return reply({'status': status, 'details': data});
+        }
+      );
+
+      // And done with the connection.
+      connection.release();
+    });
+
+
+  }
 });
 
 // Start the server

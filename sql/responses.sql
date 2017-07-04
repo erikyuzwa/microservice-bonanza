@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 04, 2017 at 08:21 AM
+-- Generation Time: Jul 04, 2017 at 09:11 PM
 -- Server version: 10.1.22-MariaDB
 -- PHP Version: 7.1.4
 
@@ -19,20 +19,20 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `invoices`
+-- Database: `records_db`
 --
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `records`
+-- Table structure for table `responses`
 --
 
-CREATE TABLE `records` (
+CREATE TABLE `responses` (
   `id` int(11) NOT NULL,
-  `documentType` varchar(256) NOT NULL,
-  `documentNumber` varchar(256) NOT NULL,
-  `originalDocumentNumber` varchar(256) DEFAULT NULL,
+  `documentType` varchar(256) NOT NULL DEFAULT 'Response',
+  `documentNumber` int(11) NOT NULL,
+  `originalDocumentNumber` int(11) DEFAULT NULL,
   `status` varchar(128) DEFAULT NULL,
   `date` date NOT NULL,
   `amount` float NOT NULL,
@@ -44,9 +44,9 @@ CREATE TABLE `records` (
 --
 
 --
--- Indexes for table `records`
+-- Indexes for table `responses`
 --
-ALTER TABLE `records`
+ALTER TABLE `responses`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -54,10 +54,10 @@ ALTER TABLE `records`
 --
 
 --
--- AUTO_INCREMENT for table `records`
+-- AUTO_INCREMENT for table `responses`
 --
-ALTER TABLE `records`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=93;COMMIT;
+ALTER TABLE `responses`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=157;COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

@@ -16,7 +16,7 @@ default:
     debug_mode: false
 development:
   database:
-    db: 'invoices'
+    db: 'records_db'
 test:
   database:
     db: 'test_db'
