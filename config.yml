@@ -1,0 +1,27 @@
+default:
+  api: '/api/v1'
+  server:
+    collector_port: 3000
+    parser_port: 4000
+    persister_port: 5000
+    reporter_port: 8080
+  rabbit:
+    url: 'amqp://localhost'
+  database:
+    host: 'localhost'
+    port: 3306
+    user: 'root'
+    password: ''
+development:
+  database:
+    db: 'invoices'
+test:
+  database:
+    db: 'test_db'
+production:
+  server:
+    reporter_port: 8000
+  database:
+    db: 'prod_db'
+    user: 'dbuser'
+    password: 'pass'

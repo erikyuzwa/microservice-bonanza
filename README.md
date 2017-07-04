@@ -16,17 +16,23 @@ These are seperate microservices written to demonstrate one possible way to stru
 # Prerequisites
 
 * RabbitMQ
-* Redis
+* MySQL
 
 # Configuration
 
 While "true" Microservices should require zero-configuration, there's always a case where your deployment network
-might dictate some constraints around what's available.
+might dictate some constraints around what's available -- especially when ports and databases are involved amirite?
+
+* update `./config.yml` with any required changes to things such as database credentials or ports
 
 # Running the services
 
 * startup the microservices using `npm start` or `yarn start`
 * logs for each microservice are located in the `./log` folder
+* `POST` the `./resources/input.json` to `http://servername:port/api/v1/collector` remembering to make sure that
+  your `content-type` is set to `application/json`
+  
+  [screenshot](./screenshot.png)
 
 # Running the unit tests
 

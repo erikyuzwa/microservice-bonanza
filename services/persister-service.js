@@ -5,33 +5,37 @@
  *        message, then we take it and dump it in our database / storage.
  *
  * @TODO: perhaps allow a web endpoint for DEBUG sessions of this service?
- * @TODO: move the server connection info to a global ./config.yml
  */
 'use strict';
 
 const Hapi = require('hapi');
 const _ = require('lodash');
+const path = require('path');
+const yaml_config = require('node-yaml-config');
+let config = yaml_config.load(path.resolve(__dirname, '../config.yml'));
 
 // Create a server with a host and port
 const server = new Hapi.Server();
 server.connection({
     host: '0.0.0.0',
-    port: 5000
+    port: config.server.persister_port
 });
 
 server.register([
     {
         register: require('hapi-rabbit'),
         options: {
-            url: 'amqp://localhost'
+            url: config.rabbit.url
         }
     }, {
         register: require('hapi-mysql'),
         options: {
-            host: 'localhost',
-            user: 'root',
-            password: '',
-            database: 'invoices'
+            host: config.database.host,
+            user: config.database.user,
+            password: config.database.password,
+            database: config.database.db,
+            connectionLimit : 100,
+            debug: false
         }
     }
 ], function (err) {

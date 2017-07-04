@@ -4,28 +4,33 @@
  * @desc: this microservice starts up and listens for a GET `/api/v1/reporter?documentNumber` query. When that happens,
  *        pull all the records stored in our persistent storage and return a JSON object in the response.
  *
- * @TODO: move the server connection info to a global ./config.yml
+ * @TODO:
  */
 'use strict';
 
 const Hapi = require('hapi');
 const _ = require('lodash');
+const path = require('path');
+const yaml_config = require('node-yaml-config');
+let config = yaml_config.load(path.resolve(__dirname, '../config.yml'));
 
 // Create a server with a host and port
 const server = new Hapi.Server();
 server.connection({
     host: '0.0.0.0',
-    port: 8080
+    port: config.server.reporter_port
 });
 
 server.register([
     {
         register: require('hapi-mysql'),
         options: {
-            host: 'localhost',
-            user: 'root',
-            password: '',
-            database: 'invoices'
+            host: config.database.host,
+            user: config.database.user,
+            password: config.database.password,
+            database: config.database.db,
+            connectionLimit : 100,
+            debug: false
         }
     }
 ], function (err) {
@@ -37,7 +42,7 @@ server.register([
 // Add the GET route
 server.route({
     method: 'GET',
-    path: '/api/v1/reporter/{documentNumber?}',
+    path: config.api + '/reporter/{documentNumber?}',
     handler: (request, reply) => {
 
       let mysql = server.plugins['hapi-mysql'];

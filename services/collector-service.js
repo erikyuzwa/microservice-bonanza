@@ -11,26 +11,29 @@
  *
  *        { "status": "ok", "invoices-received": <count of JSON objects in request>}
  *
- * @TODO: move the server connection info to a global ./config.yml
+ * @TODO:
  *
  */
 'use strict';
 
 const Hapi = require('hapi');
 const _ = require('lodash');
+const path = require('path');
+const yaml_config = require('node-yaml-config');
+let config = yaml_config.load(path.resolve(__dirname, '../config.yml'));
 
 // Create a server with a host and port
 const server = new Hapi.Server();
 server.connection({
     host: '0.0.0.0',
-    port: 3000
+    port: config.server.collector_port
 });
 
 server.register([
     {
         register: require('hapi-rabbit'),
         options: {
-            url: 'amqp://localhost'
+            url: config.rabbit.url
         }
     }
 ], function (err) {
@@ -42,7 +45,7 @@ server.register([
 // Add the route
 server.route({
     method: 'POST',
-    path: '/api/v1/collector',
+    path: config.api + '/collector',
     config: {
         payload: { output: 'data', parse: true, allow: 'application/json' }
     },

@@ -6,25 +6,27 @@
  *        rabbit as a "parsedInvoice" message.
  *
  * @TODO: perhaps allow a web endpoint for DEBUG sessions of this service?
- * @TODO: move the server connection info to a global ./config.yml
  */
 'use strict';
 
 const Hapi = require('hapi');
 const _ = require('lodash');
+const path = require('path');
+const yaml_config = require('node-yaml-config');
+let config = yaml_config.load(path.resolve(__dirname, '../config.yml'));
 
 // Create a server with a host and port
 const server = new Hapi.Server();
 server.connection({
     host: '0.0.0.0',
-    port: 4000
+    port: config.server.parser_port
 });
 
 server.register([
     {
         register: require('hapi-rabbit'),
         options: {
-            url: 'amqp://localhost'
+            url: config.rabbit.url
         }
     }
 ], function (err) {
