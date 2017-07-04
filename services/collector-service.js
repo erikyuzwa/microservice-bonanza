@@ -19,7 +19,7 @@ const _ = require('lodash');
 // Create a server with a host and port
 const server = new Hapi.Server();
 server.connection({
-    host: 'localhost',
+    host: '0.0.0.0',
     port: 3000
 });
 

@@ -12,45 +12,30 @@ const _ = require('lodash');
 // Create a server with a host and port
 const server = new Hapi.Server();
 server.connection({
-    host: 'localhost',
-    port: 6000
+    host: '0.0.0.0',
+    port: 8080
 });
 
 // Add the GET route
 server.route({
     method: 'GET',
-    path: '/api/v1/reporter',
-    config: {
-        payload: { output: 'data', parse: true, allow: 'application/json' }
-    },
+    path: '/api/v1/reporter/{documentNumber?}',
     handler: (request, reply) => {
-        
-    	console.log(request.payload);
-    	let payload = request.payload;
-    	let newInvoice = {};
-    	let status = 'ok';
 
-    	if (_.isObject(payload)) {
+      let params = request.query;
+      let status = 'ok';
+      let details;
+      console.log(params);
+      if (_.has(params, 'documentNumber')) {
 
-            newInvoice = _.pick(payload, ['date', 'amount', 'currency']);
-            if (_.has(payload, 'responseNumber')) {
-                console.log('hello');
-                newInvoice.documentType = 'Response';
-                newInvoice.documentNumber = payload['responseNumber'];
-                newInvoice.status = payload.status;
-            } else if (_.has(payload, 'invoiceNumber')) {
-                console.log('world');
-                newInvoice.documentType = 'Invoice';
-                newInvoice.documentNumber = payload['invoiceNumber'];
-            }
+        details = 'using documentNumber ' + params.documentNumber;
 
-            console.log(newInvoice);
+      } else {
+        status = 'error';
+        details = 'invalid or missing query parameter documentNumber';
+      }
 
-	    } else {
-    	    status = 'error';
-        }
-
-        return reply({'status': status, 'invoice': newInvoice});
+      return reply({'status': status, 'details': details});
     }
 });
 
