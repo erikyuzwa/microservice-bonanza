@@ -1,23 +1,14 @@
 {
   "name": "microservice-bonanza",
-  "version": "0.2.0",
-  "description": "a set of microservices for fun times",
+  "version": "0.4.0",
+  "description": "a set of microservices to demonstrate a possible pipeline",
   "main": "index.js",
-  "directories": {
-    "test": "test"
-  },
   "scripts": {
+    "start": "node .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/erikyuzwa/microservice-bonanza.git"
-  },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/erikyuzwa/microservice-bonanza/issues"
-  },
+  "author": "hello@erikyuzwa.com",
+  "license": "MIT",
   "homepage": "https://github.com/erikyuzwa/microservice-bonanza#readme",
   "devDependencies": {
     "body-parser": "^1.17.2",
@@ -34,6 +25,5 @@
     "node-yaml-config": "0.0.4",
     "optimist": "^0.6.1",
     "sinon": "^2.3.6"
-  },
-  "dependencies": {}
+  }
 }
