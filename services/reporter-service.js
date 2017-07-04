@@ -6,7 +6,7 @@
  *        in the format:
  *        [{'original': {}, 'responses': []}]
  *
- * @TODO:
+ * @TODO: would be nice to create a way to specify a documentNumber as a query param
  */
 'use strict';
 
@@ -49,13 +49,10 @@ server.route({
 
       let mysql = server.plugins['hapi-mysql'];
       let status = 'ok';
-      let queryString;
       let queryParams = [];
       let data;
 
-      queryString = 'SELECT "Invoice" as Type, documentNumber as invoiceNumber, documentNumber as docNumber, date, amount, currency, "" as status FROM invoices UNION SELECT "Response", originalDocumentNumber as invoiceNumber, documentNumber as docNumber, date, amount, currency, status FROM responses ORDER BY invoiceNumber, date';
-
-      console.log('[reporter-querystring] - %s', queryString);
+      let queryString = 'SELECT "Invoice" as Type, documentNumber as invoiceNumber, documentNumber as docNumber, date, amount, currency, "" as status FROM invoices UNION SELECT "Response", originalDocumentNumber as invoiceNumber, documentNumber as docNumber, date, amount, currency, status FROM responses ORDER BY invoiceNumber, date';
 
       mysql.pool.getConnection(function(err, connection) {
 
@@ -79,6 +76,7 @@ server.route({
 
                 if (row['Type'] === 'Invoice') {
 
+                    // if one of our head or tail has something, then push it to our result data Array
                     if (!_.isEmpty(head) || tail.length) {
                         data.push({
                             original: head,
@@ -86,6 +84,7 @@ server.route({
                         });
                     }
 
+                    // create the object which populates the 'original' object
                     head = {
                       'documentType': 'Invoice',
                       'documentNumber': row['docNumber'],
@@ -106,6 +105,7 @@ server.route({
                         'status': row['status']
                     };
 
+                    // keep appending the response items to our tail
                     tail.push(item);
                 }
 
@@ -120,7 +120,7 @@ server.route({
         }
       );
 
-      // And done with the connection.
+      // release the connection.
       connection.release();
     });
 
