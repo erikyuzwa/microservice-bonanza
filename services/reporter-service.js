@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
  * @name: reporter-service
- * @desc: this microservice starts up and subscribes directly to our rabbit message bus. When we hear a "parsedInvoice"
- *        message, then we take it and produce a JSON report
+ * @desc: this microservice starts up and listens for a GET `/api/v1/reporter?documentNumber` query. When that happens,
+ *        pull all the records stored in our persistent storage and return a JSON object in the response.
  */
 'use strict';
 
@@ -16,23 +16,10 @@ server.connection({
     port: 6000
 });
 
-server.register([
-    {
-        register: require('hapi-rabbit'),
-        options: {
-            url: 'amqp://localhost'
-        }
-    }
-], function (err) {
-    if (err) {
-        throw err;
-    }
-});
-
-// Add the route
+// Add the GET route
 server.route({
-    method: 'POST',
-    path: '/api/v1/parser',
+    method: 'GET',
+    path: '/api/v1/reporter',
     config: {
         payload: { output: 'data', parse: true, allow: 'application/json' }
     },
@@ -72,21 +59,6 @@ server.start((err) => {
     if (err) {
         throw err;
     }
-
-    let rabbit = server.plugins['hapi-rabbit'];
-    rabbit.createContext(function(err, context) {
-
-        if (err){
-            throw err;
-        }
-
-        rabbit.subscribe(context, 'exchange', function(err, message) {
-
-            console.log('message', message);
-
-
-        });
-    });
 
     console.log('reporter microservice running at : ', server.info.uri);
 });

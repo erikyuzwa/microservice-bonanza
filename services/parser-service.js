@@ -4,6 +4,8 @@
  * @desc: this microservice starts up and subscribes directly to our rabbit message bus. When we hear a "collectedInvoice"
  *        message, then we take it and parse / validate it. If our validation succeeds, then we post it back to
  *        rabbit as a "parsedInvoice" message.
+ *
+ * @TODO: perhaps allow a web endpoint for DEBUG sessions of this service?
  */
 'use strict';
 
@@ -30,7 +32,8 @@ server.register([
     }
 });
 
-// Add the route
+/*
+* // turf this once we move the parsing logic into the rabbit subscriber area
 server.route({
     method: 'POST',
     path: '/api/v1/parser',
@@ -67,6 +70,7 @@ server.route({
         return reply({'status': status, 'invoice': newInvoice});
     }
 });
+*/
 
 // Start the server
 server.start((err) => {

@@ -4,7 +4,12 @@
  * @desc: this microservice starts up and listens for HTTP POST messages which could either be by a browser or via
  *        a tool like Postman.
  *
- *        Any JSON data (or Array of JSON data) is then published via rabbit to the message bus
+ *        Any JSON data (or Array of JSON data) is then published via rabbit to the message bus.
+ *
+ *        This microservice will then produce a response back to the caller with a JSON object containing a status
+ *        code and number of invoice items sent in the request.
+ *
+ *        { "status": "ok", "invoices-received": <count of JSON objects in request>}
  */
 'use strict';
 

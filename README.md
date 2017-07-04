@@ -23,10 +23,14 @@ These are seperate microservices written to demonstrate one possible way to stru
 While "true" Microservices should require zero-configuration, there's always a case where your deployment network
 might dictate some constraints around what's available.
 
-# Running 
+# Running the services
 
 * startup the microservices using `npm start` or `yarn start`
+* logs for each microservice are located in the `./log` folder
 
+# Running the unit tests
+
+* `npm test`
 
 # LICENSE
 
