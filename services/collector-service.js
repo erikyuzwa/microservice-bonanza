@@ -18,25 +18,26 @@
 
 const Hapi = require('hapi');
 const _ = require('lodash');
-const path = require('path');
-const yaml_config = require('node-yaml-config');
-let config = yaml_config.load(path.resolve(__dirname, '../config.yml'));
+const Path = require('path');
+const YamlConfig = require('node-yaml-config');
+const Config = YamlConfig.load(Path.resolve(__dirname, '../config.yml'));
 
 // Create a server with a host and port
 const server = new Hapi.Server();
 server.connection({
     host: '0.0.0.0',
-    port: config.server.collector_port
+    port: Config.server.collector_port
 });
 
 server.register([
     {
         register: require('hapi-rabbit'),
         options: {
-            url: config.rabbit.url
+            url: Config.rabbit.url
         }
     }
-], function (err) {
+], (err) => {
+
     if (err) {
         throw err;
     }
@@ -45,61 +46,76 @@ server.register([
 // Add the route
 server.route({
     method: 'POST',
-    path: config.api + '/collector',
+    path: Config.api + '/collector',
     config: {
         payload: { output: 'data', parse: true, allow: 'application/json' }
     },
     handler: (request, reply) => {
 
     	console.log(request.payload);
-    	let payload = request.payload;
+    	const payload = request.payload;
     	let count = 0;
     	let status = 'ok';
+    	const rabbit = request.server.plugins['hapi-rabbit'];
 
-    	let rabbit = request.server.plugins['hapi-rabbit'];
+    	if (_.isObject(payload) && _.isEmpty(payload)) {
+    		return reply({
+	            'status': status,
+	            'invoices-received': count
+            });
+	    }
 
     	// we should account for either a single JSON being POST'd to our collector
 	    // or an Array of them
 	    if (_.isArray(payload)) {
-	    	_.forOwn(payload, function(v, k) {
-    			// console.log(v);
+	    	_.forOwn(payload, (v, k) => {
 
+	    		// console.log(v);
     			// beam each one to our parser microservice
 			    if (rabbit) {
-				    rabbit.createContext(function (err, context) {
-					    if (err) {
-						    console.log('err', err);
+			    	rabbit.createContext((err, context) => {
+
+			    		if (err) {
+			    			console.log('err', err);
 					    }
 
-					    rabbit.publish(context, 'exchange', 'collectedInvoice', v, function (err, data) {
-						    console.log('[publish] messageObject', data);
+					    rabbit.publish(context, 'exchange', 'collectedInvoice', v, (err, data) => {
+
+					    	console.log('[publish] messageObject', data);
 					    });
 				    });
 			    }
 
     			count++;
 		    });
-	    } else if (_.isObject(payload)) {
+	    }
+	    else if (_.isObject(payload)) {
 
 		    // beam each one to our parser microservice
 		    if (rabbit) {
-			    rabbit.createContext(function (err, context) {
+			    rabbit.createContext((err, context) => {
+
 				    if (err) {
 					    console.log('err', err);
 				    }
 
-				    rabbit.publish(context, 'exchange', 'collectedInvoice', payload, function (err, data) {
+				    rabbit.publish(context, 'exchange', 'collectedInvoice', payload, (err, data) => {
+
 					    console.log('[publish] messageObject', data);
 				    });
 			    });
 	        }
 
 	    	count = 1;
-	    } else {
+	    }
+	    else {
 	    	status = 'error';
 	    }
 
-        return reply({'status': status, 'invoices-received': count});
+        return reply({
+	        'status': status,
+	        'invoices-received': count
+        });
     }
 });
 
@@ -112,3 +128,5 @@ server.start((err) => {
 
     console.log('collector microservice running at : ', server.info.uri);
 });
+
+module.exports = server;

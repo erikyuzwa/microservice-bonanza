@@ -10,35 +10,36 @@
 
 const Hapi = require('hapi');
 const _ = require('lodash');
-const path = require('path');
-const yaml_config = require('node-yaml-config');
-let config = yaml_config.load(path.resolve(__dirname, '../config.yml'));
+const Path = require('path');
+const YamlConfig = require('node-yaml-config');
+const Config = YamlConfig.load(Path.resolve(__dirname, '../config.yml'));
 
 // Create a server with a host and port
 const server = new Hapi.Server();
 server.connection({
     host: '0.0.0.0',
-    port: config.server.persister_port
+    port: Config.server.persister_port
 });
 
 server.register([
     {
         register: require('hapi-rabbit'),
         options: {
-            url: config.rabbit.url
+            url: Config.rabbit.url
         }
     }, {
         register: require('hapi-mysql'),
         options: {
-            host: config.database.host,
-            user: config.database.user,
-            password: config.database.password,
-            database: config.database.db,
-            connectionLimit : config.database.connection_pool_limit,
-            debug: config.database.debug_mode
+            host: Config.database.host,
+            user: Config.database.user,
+            password: Config.database.password,
+            database: Config.database.db,
+            connectionLimit : Config.database.connection_pool_limit,
+            debug: Config.database.debug_mode
         }
     }
-], function (err) {
+], (err) => {
+
     if (err) {
         throw err;
     }
@@ -46,19 +47,20 @@ server.register([
 
 // Start the server
 server.start((err) => {
+
     if (err) {
         throw err;
     }
 
-    let rabbit = server.plugins['hapi-rabbit'];
-    let mysql = server.plugins['hapi-mysql'];
-    rabbit.createContext(function(err, context) {
+    const rabbit = server.plugins['hapi-rabbit'];
+    const mysql = server.plugins['hapi-mysql'];
+    rabbit.createContext((err, context) => {
 
         if (err){
             throw err;
         }
 
-        rabbit.subscribe(context, 'exchange', function(err, message) {
+        rabbit.subscribe(context, 'exchange', (err, message) => {
 
             //console.log('[subscribe] message', message);
             let messageData;
@@ -69,7 +71,7 @@ server.start((err) => {
             		if (_.isObject(messageData)) {
 
                         console.log('[persist] parsedInvoice - ', messageData);
-                        mysql.pool.getConnection(function(err, connection) {
+                        mysql.pool.getConnection((err, connection) => {
 
                           // build our query - if our originalDocumentNumber and status are populated, then we're
                           // working with a Response. Otherwise we have an Invoice
@@ -79,7 +81,8 @@ server.start((err) => {
                               queryString = 'INSERT INTO responses (documentNumber, date, amount, currency, originalDocumentNumber, status) VALUES (?,?,?,?,?,?)';
                               queryParams.push(messageData.originalDocumentNumber);
                               queryParams.push(messageData.status);
-                          } else {
+                          }
+                          else {
                               queryString = 'INSERT INTO invoices (documentNumber, date, amount, currency) VALUES (?,?,?,?)';
                           }
 
@@ -87,9 +90,9 @@ server.start((err) => {
                           connection.query(
                             queryString,
                             queryParams,
-                            function(err, rows) {
+                            (err, rows) => {
 
-                              if(err) {
+                              if (err) {
                                 throw new Error(err);
                               }
 
@@ -111,3 +114,5 @@ server.start((err) => {
 
     console.log('persister microservice running at : ', server.info.uri);
 });
+
+module.exports = server;

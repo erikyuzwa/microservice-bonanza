@@ -11,25 +11,26 @@
 
 const Hapi = require('hapi');
 const _ = require('lodash');
-const path = require('path');
-const yaml_config = require('node-yaml-config');
-let config = yaml_config.load(path.resolve(__dirname, '../config.yml'));
+const Path = require('path');
+const YamlConfig = require('node-yaml-config');
+const Config = YamlConfig.load(Path.resolve(__dirname, '../config.yml'));
 
 // Create a server with a host and port
 const server = new Hapi.Server();
 server.connection({
     host: '0.0.0.0',
-    port: config.server.parser_port
+    port: Config.server.parser_port
 });
 
 server.register([
     {
         register: require('hapi-rabbit'),
         options: {
-            url: config.rabbit.url
+            url: Config.rabbit.url
         }
     }
-], function (err) {
+], (err) => {
+
     if (err) {
         throw err;
     }
@@ -37,12 +38,13 @@ server.register([
 
 // Start the server
 server.start((err) => {
+
     if (err) {
         throw err;
     }
 
-    let rabbit = server.plugins['hapi-rabbit'];
-    rabbit.createContext(function(err, context){
+    const rabbit = server.plugins['hapi-rabbit'];
+    rabbit.createContext((err, context) => {
 
         if (err){
             throw err;
@@ -51,7 +53,7 @@ server.start((err) => {
         let messageData;
         let parsedInvoice = {};
 
-        rabbit.subscribe(context, 'exchange', function(err, message) {
+        rabbit.subscribe(context, 'exchange', (err, message) => {
             //console.log('[subscribe] message', message);
 
             if (_.has(message, 'type')) {
@@ -60,19 +62,20 @@ server.start((err) => {
             		if (_.isObject(messageData)) {
 
             			console.log('[parser] collectedInvoice - ', messageData);
-
             			parsedInvoice = _.pick(messageData, ['date', 'amount', 'currency']);
 			            if (_.has(messageData, 'responseNumber')) {
 			                parsedInvoice.documentType = 'Response';
-			                parsedInvoice.documentNumber = messageData['responseNumber'];
-			                parsedInvoice.originalDocumentNumber = messageData['originalInvoiceNumber'];
+			                parsedInvoice.documentNumber = messageData.responseNumber;
+			                parsedInvoice.originalDocumentNumber = messageData.originalInvoiceNumber;
 			                parsedInvoice.status = messageData.status;
-			            } else if (_.has(messageData, 'invoiceNumber')) {
+			            }
+			            else if (_.has(messageData, 'invoiceNumber')) {
 			                parsedInvoice.documentType = 'Invoice';
-			                parsedInvoice.documentNumber = messageData['invoiceNumber'];
+			                parsedInvoice.documentNumber = messageData.invoiceNumber;
 			            }
 
-			            rabbit.publish(context, 'exchange', 'parsedInvoice', parsedInvoice, function (err, data) {
+			            rabbit.publish(context, 'exchange', 'parsedInvoice', parsedInvoice, (err, data) => {
+
 							console.log('[publish] messageObject', data);
 						});
 
@@ -85,3 +88,5 @@ server.start((err) => {
 
     console.log('parser microservice running at : ', server.info.uri);
 });
+
+module.exports = server;

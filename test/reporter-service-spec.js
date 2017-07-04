@@ -10,36 +10,70 @@ const lab       = exports.lab = Lab.script();
 const describe  = lab.describe;
 const it        = lab.it;
 
-// we require the handlers directly, so we can test the "Lib" functions in isolation
-const ProductHandlers = require('../../handlers/products');
+const Path = require('path');
+const YamlConfig = require('node-yaml-config');
+const Config = YamlConfig.load(Path.resolve(__dirname, '../config.yml'));
+
+const Server = require('../services/reporter-service.js');
+
+const requestDefaults = {
+    method: 'POST',
+    url: Config.api
+};
 
 describe('unit tests - reporter-service', () => {
 
-    it('should return all products', (done) => {
+    it('endpoint test | POST / | empty payload', (done) => {
 
-        // test lib function
-        ProductHandlers.lib.getProducts().done((products) => {
+        const request = Object.assign({}, requestDefaults);
+        request.payload = {};
+        Server
+            .inject(request)
+            .then(response => {
 
-            expect(products).to.be.an.array().and.have.length(2);
+                expect(response.statusCode).to.equal(404);
+                done();
+            }, (err) => {
 
-            done();
-        }, (err) => {
+                done(err);
+            });
 
-            done(err);
-        });
     });
 
-    it('should return single product', (done) => {
+    it('endpoint test | POST /reporter | empty payload', (done) => {
 
-        ProductHandlers.lib.getProducts(1).done((product) => {
+        const request = Object.assign({}, requestDefaults);
+        request.url += '/reporter';
+        request.payload = {};
 
-            expect(product).to.be.an.object();
+        Server
+            .inject(request)
+            .then(response => {
 
-            done();
-        }, (err) => {
+                expect(response.statusCode).to.equal(404);
+                done();
+            }, (err) => {
 
-            done(err);
-        });
+                done(err);
+            });
+    });
+
+    it('endpoint test | GET /reporter | empty query params', (done) => {
+
+        const request = Object.assign({}, requestDefaults);
+        request.method = 'GET';
+        request.url += '/reporter';
+
+        Server
+            .inject(request)
+            .then(response => {
+
+                expect(response.statusCode).to.equal(200);
+                done();
+            }, (err) => {
+
+                done(err);
+            });
     });
 });
 

@@ -1,27 +1,28 @@
 #!/usr/bin/env node
 'use strict';
-const fs = require('fs');
-const path = require('path');
-let spawn = require('child_process').spawn;
+const Fs = require('fs');
+const Path = require('path');
+const Spawn = require('child_process').spawn;
 
-let services = ['collector-service', 'parser-service', 'persister-service', 'reporter-service'];
+const services = ['collector-service', 'parser-service', 'persister-service', 'reporter-service'];
 
 function mkdirIfNotExist(filepath) {
-    let dirname = path.dirname(filepath);
-    if (!fs.existsSync(dirname)) {
-       fs.mkdirSync(dirname);
+
+    const dirname = Path.dirname(filepath);
+    if (!Fs.existsSync(dirname)) {
+        Fs.mkdirSync(dirname);
     }
 }
 
-services.forEach(function(service) {
+services.forEach((service) => {
 
-  mkdirIfNotExist('./log/' + service + '.log');
-  let log  = fs.createWriteStream('./log/' + service + '.log');
-  let proc = spawn('node', ['./services/' + service + '.js', '']);
+    mkdirIfNotExist('./log/' + service + '.log');
+    const log  = Fs.createWriteStream('./log/' + service + '.log');
+    const proc = Spawn('node', ['./services/' + service + '.js', '']);
 
-  proc.stdout.pipe(log);
-  proc.stderr.pipe(log);
+    proc.stdout.pipe(log);
+    proc.stderr.pipe(log);
 
-  proc.stdout.pipe(process.stdout);
-  proc.stderr.pipe(process.stderr);
+    proc.stdout.pipe(process.stdout);
+    proc.stderr.pipe(process.stderr);
 });
