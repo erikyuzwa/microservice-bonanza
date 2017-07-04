@@ -6,6 +6,7 @@
  *        rabbit as a "parsedInvoice" message.
  *
  * @TODO: perhaps allow a web endpoint for DEBUG sessions of this service?
+ * @TODO: move the server connection info to a global ./config.yml
  */
 'use strict';
 
@@ -32,46 +33,6 @@ server.register([
     }
 });
 
-/*
-* // turf this once we move the parsing logic into the rabbit subscriber area
-server.route({
-    method: 'POST',
-    path: '/api/v1/parser',
-    config: {
-        payload: { output: 'data', parse: true, allow: 'application/json' }
-    },
-    handler: (request, reply) => {
-
-    	console.log(request.payload);
-    	let payload = request.payload;
-    	let newInvoice = {};
-    	let status = 'ok';
-
-    	if (_.isObject(payload)) {
-
-            newInvoice = _.pick(payload, ['date', 'amount', 'currency']);
-            if (_.has(payload, 'responseNumber')) {
-                console.log('hello');
-                newInvoice.documentType = 'Response';
-                newInvoice.documentNumber = payload['responseNumber'];
-                newInvoice.status = payload.status;
-            } else if (_.has(payload, 'invoiceNumber')) {
-                console.log('world');
-                newInvoice.documentType = 'Invoice';
-                newInvoice.documentNumber = payload['invoiceNumber'];
-            }
-
-            console.log(newInvoice);
-
-	    } else {
-    	    status = 'error';
-        }
-
-        return reply({'status': status, 'invoice': newInvoice});
-    }
-});
-*/
-
 // Start the server
 server.start((err) => {
     if (err) {
@@ -85,13 +46,38 @@ server.start((err) => {
             throw err;
         }
 
-        rabbit.subscribe(context, 'exchange', function(err, message) {
-            console.log('message', message);
+        let messageData;
+        let parsedInvoice = {};
 
-            // TODO publish a "parsedInvoice" message
-             //rabbit.publish(context, 'exchange', 'collectedInvoice', payload, function (err, data) {
-			//	console.log('messageObject', data);
-			 //});
+        rabbit.subscribe(context, 'exchange', function(err, message) {
+            //console.log('[subscribe] message', message);
+
+            if (_.has(message, 'type')) {
+            	if (message.type === 'collectedInvoice') {
+            		messageData = message.data;
+            		if (_.isObject(messageData)) {
+
+            			console.log('[parser] collectedInvoice - ', messageData);
+
+            			parsedInvoice = _.pick(messageData, ['date', 'amount', 'currency']);
+			            if (_.has(messageData, 'responseNumber')) {
+			                parsedInvoice.documentType = 'Response';
+			                parsedInvoice.documentNumber = messageData['responseNumber'];
+			                parsedInvoice.originalDocumentNumber = messageData['originalInvoiceNumber'];
+			                parsedInvoice.status = messageData.status;
+			            } else if (_.has(messageData, 'invoiceNumber')) {
+			                parsedInvoice.documentType = 'Invoice';
+			                parsedInvoice.documentNumber = messageData['invoiceNumber'];
+			            }
+
+			            rabbit.publish(context, 'exchange', 'parsedInvoice', parsedInvoice, function (err, data) {
+							console.log('[publish] messageObject', data);
+						});
+
+		            }
+	            }
+            }
+
         });
     });
 

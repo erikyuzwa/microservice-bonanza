@@ -5,6 +5,7 @@
  *        message, then we take it and dump it in our database / storage.
  *
  * @TODO: perhaps allow a web endpoint for DEBUG sessions of this service?
+ * @TODO: move the server connection info to a global ./config.yml
  */
 'use strict';
 
@@ -24,6 +25,14 @@ server.register([
         options: {
             url: 'amqp://localhost'
         }
+    }, {
+        register: require('hapi-mysql'),
+        options: {
+            host: 'localhost',
+            user: 'root',
+            password: '',
+            database: 'invoices'
+        }
     }
 ], function (err) {
     if (err) {
@@ -38,6 +47,7 @@ server.start((err) => {
     }
 
     let rabbit = server.plugins['hapi-rabbit'];
+    let mysql = server.plugins['hapi-mysql'];
     rabbit.createContext(function(err, context) {
 
         if (err){
@@ -46,12 +56,45 @@ server.start((err) => {
 
         rabbit.subscribe(context, 'exchange', function(err, message) {
 
-            console.log('message', message);
+            //console.log('[subscribe] message', message);
+            let messageData;
 
-            // TODO - subscribe to a "parsedInvoice" message
-             //rabbit.publish(context, 'exchange', 'collectedInvoice', payload, function (err, data) {
-			//	    console.log('messageObject', data);
-			 //});
+            if (_.has(message, 'type')) {
+            	if (message.type === 'parsedInvoice') {
+            		messageData = message.data;
+            		if (_.isObject(messageData)) {
+
+                        console.log('[persist] parsedInvoice - ', messageData);
+                        mysql.pool.getConnection(function(err, connection) {
+
+                          // Use the connection
+                          connection.query(
+                            'INSERT INTO records (documentType, documentNumber, date, amount, currency, originalDocumentNumber, status) VALUES (?,?,?,?,?,?,?)',
+                            [messageData.documentType,
+                             messageData.documentNumber,
+                             messageData.date,
+                             messageData.amount,
+                             messageData.currency,
+                             messageData.originalDocumentNumber,
+                             messageData.status
+                            ],
+                            function(err, rows) {
+
+                              if(err) {
+                                throw new Error(err);
+                              }
+
+                              console.log('[persist] rows - ', rows);
+                            }
+                          );
+
+                          // And done with the connection.
+                          connection.release();
+                        });
+
+		            }
+	            }
+            }
 
 
         });

@@ -5,19 +5,28 @@
   "main": "index.js",
   "scripts": {
     "start": "rm -rf log && node .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node node_modules/lab/bin/lab -v -L -C -D -c -t 85",
+    "test-cov-html": "lab -r html -o coverage.html"
   },
   "author": "hello@erikyuzwa.com",
   "license": "MIT",
   "homepage": "https://github.com/erikyuzwa/microservice-bonanza#readme",
-  "devDependencies": {
-    "chai": "^4.0.2",
-    "hapi": "^16.4.3",
+  "dependencies": {
+    "hapi": "^14.1.0",
+    "hapi-mysql": "^1.0.15",
     "hapi-rabbit": "0.0.4",
+    "hapi-swagger": "^6.2.1",
+    "inert": "^4.2.0",
+    "joi": "^9.0.4",
     "lodash": "^4.17.4",
-    "mocha": "^3.4.2",
+    "moment": "^2.18.1",
     "node-yaml-config": "0.0.4",
     "optimist": "^0.6.1",
-    "sinon": "^2.3.6"
+    "promise": "^8.0.0",
+    "vision": "^4.1.1"
+  },
+  "devDependencies": {
+    "code": "^3.0.1",
+    "lab": "^10.9.0"
   }
 }

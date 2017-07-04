@@ -10,6 +10,9 @@
  *        code and number of invoice items sent in the request.
  *
  *        { "status": "ok", "invoices-received": <count of JSON objects in request>}
+ *
+ * @TODO: move the server connection info to a global ./config.yml
+ *
  */
 'use strict';
 
@@ -59,30 +62,34 @@ server.route({
     			// console.log(v);
 
     			// beam each one to our parser microservice
-			    rabbit.createContext(function(err, context) {
-				    if (err) {
-					    console.log('err', err);
-				    }
+			    if (rabbit) {
+				    rabbit.createContext(function (err, context) {
+					    if (err) {
+						    console.log('err', err);
+					    }
 
-				    rabbit.publish(context, 'exchange', 'collectedInvoice', v, function (err, data) {
-					    console.log('messageObject', data);
+					    rabbit.publish(context, 'exchange', 'collectedInvoice', v, function (err, data) {
+						    console.log('[publish] messageObject', data);
+					    });
 				    });
-			    });
+			    }
 
     			count++;
 		    });
 	    } else if (_.isObject(payload)) {
 
-	    	// beam each one to our parser microservice
-		    rabbit.createContext(function(err, context) {
-			    if (err) {
-				    console.log('err', err);
-			    }
+		    // beam each one to our parser microservice
+		    if (rabbit) {
+			    rabbit.createContext(function (err, context) {
+				    if (err) {
+					    console.log('err', err);
+				    }
 
-			    rabbit.publish(context, 'exchange', 'collectedInvoice', payload, function (err, data) {
-				    console.log('messageObject', data);
+				    rabbit.publish(context, 'exchange', 'collectedInvoice', payload, function (err, data) {
+					    console.log('[publish] messageObject', data);
+				    });
 			    });
-		    });
+	        }
 
 	    	count = 1;
 	    } else {
