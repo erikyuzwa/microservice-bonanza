@@ -23,6 +23,7 @@ These are seperate microservices written to demonstrate one possible way to stru
 While "true" Microservices should require zero-configuration, there's always a case where your deployment network
 might dictate some constraints around what's available -- especially when ports and databases are involved amirite?
 
+* import the SQL table data from `./sql/records.sql`
 * update `./config.yml` with any required changes to things such as database credentials or ports
 
 # Running the services
