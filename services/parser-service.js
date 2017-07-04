@@ -87,6 +87,8 @@ server.start((err) => {
 
         rabbit.subscribe(context, 'exchange', function(err, message) {
             console.log('message', message);
+
+            // TODO publish a "parsedInvoice" message
              //rabbit.publish(context, 'exchange', 'collectedInvoice', payload, function (err, data) {
 			//	console.log('messageObject', data);
 			 //});

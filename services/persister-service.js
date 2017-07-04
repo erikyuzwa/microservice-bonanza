@@ -48,6 +48,7 @@ server.start((err) => {
 
             console.log('message', message);
 
+            // TODO - subscribe to a "parsedInvoice" message
              //rabbit.publish(context, 'exchange', 'collectedInvoice', payload, function (err, data) {
 			//	    console.log('messageObject', data);
 			 //});

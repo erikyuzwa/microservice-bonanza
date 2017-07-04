@@ -24,7 +24,7 @@ server.route({
         payload: { output: 'data', parse: true, allow: 'application/json' }
     },
     handler: (request, reply) => {
-
+        
     	console.log(request.payload);
     	let payload = request.payload;
     	let newInvoice = {};
