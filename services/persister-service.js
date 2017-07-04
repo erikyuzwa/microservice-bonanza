@@ -34,8 +34,8 @@ server.register([
             user: config.database.user,
             password: config.database.password,
             database: config.database.db,
-            connectionLimit : 100,
-            debug: false
+            connectionLimit : config.database.connection_pool_limit,
+            debug: config.database.debug_mode
         }
     }
 ], function (err) {

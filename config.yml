@@ -12,6 +12,8 @@ default:
     port: 3306
     user: 'root'
     password: ''
+    connection_pool_limit: 100
+    debug_mode: false
 development:
   database:
     db: 'invoices'

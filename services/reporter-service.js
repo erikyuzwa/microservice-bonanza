@@ -4,6 +4,9 @@
  * @desc: this microservice starts up and listens for a GET `/api/v1/reporter?documentNumber` query. When that happens,
  *        pull all the records stored in our persistent storage and return a JSON object in the response.
  *
+ *        When there is no `documentNumber` query param specified, then proceed to yank out the entire archive in
+ *        the database backend.
+ *
  * @TODO:
  */
 'use strict';
@@ -29,8 +32,8 @@ server.register([
             user: config.database.user,
             password: config.database.password,
             database: config.database.db,
-            connectionLimit : 100,
-            debug: false
+            connectionLimit : config.database.connection_pool_limit,
+            debug: config.database.debug_mode
         }
     }
 ], function (err) {
