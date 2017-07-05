@@ -6,13 +6,13 @@ const Spawn = require('child_process').spawn;
 
 const services = ['collector-service', 'parser-service', 'persister-service', 'reporter-service'];
 
-function mkdirIfNotExist(filepath) {
+const mkdirIfNotExist = function (filepath) {
 
     const dirname = Path.dirname(filepath);
     if (!Fs.existsSync(dirname)) {
         Fs.mkdirSync(dirname);
     }
-}
+};
 
 services.forEach((service) => {
 

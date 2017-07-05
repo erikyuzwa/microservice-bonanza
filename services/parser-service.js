@@ -46,7 +46,7 @@ server.start((err) => {
     const rabbit = server.plugins['hapi-rabbit'];
     rabbit.createContext((err, context) => {
 
-        if (err){
+        if (err) {
             throw err;
         }
 
@@ -55,19 +55,21 @@ server.start((err) => {
 
         rabbit.subscribe(context, 'exchange', (err, message) => {
             //console.log('[subscribe] message', message);
+	        if (err) {
+		        throw new Error(err);
+	        }
 
             if (_.has(message, 'type')) {
-            	if (message.type === 'collectedInvoice') {
-            		messageData = message.data;
-            		if (_.isObject(messageData)) {
-
-            			console.log('[parser] collectedInvoice - ', messageData);
-            			parsedInvoice = _.pick(messageData, ['date', 'amount', 'currency']);
-			            if (_.has(messageData, 'responseNumber')) {
-			                parsedInvoice.documentType = 'Response';
-			                parsedInvoice.documentNumber = messageData.responseNumber;
-			                parsedInvoice.originalDocumentNumber = messageData.originalInvoiceNumber;
-			                parsedInvoice.status = messageData.status;
+	        	if (message.type === 'collectedInvoice') {
+	        		messageData = message.data;
+	        		if (_.isObject(messageData)) {
+	        			console.log('[parser] collectedInvoice - ', messageData);
+	        			parsedInvoice = _.pick(messageData, ['date', 'amount', 'currency']);
+	        			if (_.has(messageData, 'responseNumber')) {
+	        				parsedInvoice.documentType = 'Response';
+	        				parsedInvoice.documentNumber = messageData.responseNumber;
+	        				parsedInvoice.originalDocumentNumber = messageData.originalInvoiceNumber;
+	        				parsedInvoice.status = messageData.status;
 			            }
 			            else if (_.has(messageData, 'invoiceNumber')) {
 			                parsedInvoice.documentType = 'Invoice';
@@ -76,16 +78,17 @@ server.start((err) => {
 
 			            rabbit.publish(context, 'exchange', 'parsedInvoice', parsedInvoice, (err, data) => {
 
-							console.log('[publish] messageObject', data);
-						});
+			            	if (err) {
+			            		throw new Error(err);
+				            }
 
-		            }
-	            }
-            }
-
+				            console.log('[publish] messageObject', data);
+			            });
+	        		}
+	        	}
+	        }
         });
     });
-
     console.log('parser microservice running at : ', server.info.uri);
 });
 

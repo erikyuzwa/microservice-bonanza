@@ -39,7 +39,7 @@ server.register([
 ], (err) => {
 
     if (err) {
-        throw err;
+        throw new Error(err);
     }
 });
 
@@ -52,7 +52,7 @@ server.route({
     },
     handler: (request, reply) => {
 
-    	console.log(request.payload);
+    	//console.log(request.payload);
     	const payload = request.payload;
     	let count = 0;
     	let status = 'ok';
@@ -76,10 +76,14 @@ server.route({
 			    	rabbit.createContext((err, context) => {
 
 			    		if (err) {
-			    			console.log('err', err);
+			    			throw new Error(err);
 					    }
 
 					    rabbit.publish(context, 'exchange', 'collectedInvoice', v, (err, data) => {
+
+					    	if (err) {
+					    		throw new Error(err);
+						    }
 
 					    	console.log('[publish] messageObject', data);
 					    });
@@ -96,10 +100,14 @@ server.route({
 			    rabbit.createContext((err, context) => {
 
 				    if (err) {
-					    console.log('err', err);
+					    throw new Error(err);
 				    }
 
 				    rabbit.publish(context, 'exchange', 'collectedInvoice', payload, (err, data) => {
+
+				    	if (err) {
+				    		throw new Error(err);
+					    }
 
 					    console.log('[publish] messageObject', data);
 				    });

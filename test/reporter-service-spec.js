@@ -29,7 +29,7 @@ describe('unit tests - reporter-service', () => {
         request.payload = {};
         Server
             .inject(request)
-            .then(response => {
+            .then((response) => {
 
                 expect(response.statusCode).to.equal(404);
                 done();
@@ -48,7 +48,7 @@ describe('unit tests - reporter-service', () => {
 
         Server
             .inject(request)
-            .then(response => {
+            .then((response) => {
 
                 expect(response.statusCode).to.equal(404);
                 done();
@@ -66,7 +66,7 @@ describe('unit tests - reporter-service', () => {
 
         Server
             .inject(request)
-            .then(response => {
+            .then((response) => {
 
                 expect(response.statusCode).to.equal(200);
                 done();

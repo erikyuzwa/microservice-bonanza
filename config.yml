@@ -19,7 +19,7 @@ development:
     db: 'records_db'
 test:
   database:
-    db: 'test_db'
+    db: 'records_db'
 production:
   server:
     reporter_port: 8000

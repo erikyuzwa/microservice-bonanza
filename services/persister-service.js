@@ -56,62 +56,65 @@ server.start((err) => {
     const mysql = server.plugins['hapi-mysql'];
     rabbit.createContext((err, context) => {
 
-        if (err){
-            throw err;
+        if (err) {
+            throw new Error(err);
         }
 
         rabbit.subscribe(context, 'exchange', (err, message) => {
+
+            if (err) {
+                throw new Error(err);
+            }
 
             //console.log('[subscribe] message', message);
             let messageData;
 
             if (_.has(message, 'type')) {
-            	if (message.type === 'parsedInvoice') {
-            		messageData = message.data;
-            		if (_.isObject(messageData)) {
+                if (message.type === 'parsedInvoice') {
+                    messageData = message.data;
+                    if (_.isObject(messageData)) {
 
                         console.log('[persist] parsedInvoice - ', messageData);
                         mysql.pool.getConnection((err, connection) => {
 
-                          // build our query - if our originalDocumentNumber and status are populated, then we're
-                          // working with a Response. Otherwise we have an Invoice
-                          let queryString;
-                          let queryParams = [messageData.documentNumber, messageData.date, messageData.amount, messageData.currency];
-                          if (_.has(messageData, 'status') || _.has(messageData, 'originalDocumentNumber')) {
-                              queryString = 'INSERT INTO responses (documentNumber, date, amount, currency, originalDocumentNumber, status) VALUES (?,?,?,?,?,?)';
-                              queryParams.push(messageData.originalDocumentNumber);
-                              queryParams.push(messageData.status);
-                          }
-                          else {
-                              queryString = 'INSERT INTO invoices (documentNumber, date, amount, currency) VALUES (?,?,?,?)';
-                          }
-
-                          // Use the connection
-                          connection.query(
-                            queryString,
-                            queryParams,
-                            (err, rows) => {
-
-                              if (err) {
+                            if (err) {
                                 throw new Error(err);
-                              }
-
-                              console.log('[persist] rows - ', rows);
                             }
-                          );
 
-                          // And done with the connection.
-                          connection.release();
+                            // build our query - if our originalDocumentNumber and status are populated, then we're
+                            // working with a Response. Otherwise we have an Invoice
+                            let queryString;
+                            const queryParams = [messageData.documentNumber, messageData.date, messageData.amount, messageData.currency];
+                            if (_.has(messageData, 'status') || _.has(messageData, 'originalDocumentNumber')) {
+                                queryString = 'INSERT INTO responses (documentNumber, date, amount, currency, originalDocumentNumber, status) VALUES (?,?,?,?,?,?)';
+                                queryParams.push(messageData.originalDocumentNumber);
+                                queryParams.push(messageData.status);
+                            }
+                            else {
+                                queryString = 'INSERT INTO invoices (documentNumber, date, amount, currency) VALUES (?,?,?,?)';
+                            }
+
+                            // Use the connection
+                            connection.query(
+                                queryString,
+                                queryParams,
+                                (err, rows) => {
+
+                                    if (err) {
+                                        throw new Error(err);
+                                    }
+
+                                    console.log('[persist] rows - ', rows);
+                                });
+
+                            // And done with the connection.
+                            connection.release();
                         });
-
-		            }
-	            }
+                    }
+                }
             }
-
-
         });
     });
-
     console.log('persister microservice running at : ', server.info.uri);
 });
 

@@ -57,6 +57,10 @@ server.route({
 
         mysql.pool.getConnection((err, connection) => {
 
+            if (err) {
+                throw new Error(err);
+            }
+
             connection.query(
                 queryString,
                 queryParams,
@@ -66,7 +70,7 @@ server.route({
                         throw new Error(err);
                     }
 
-                    console.log(rows);
+                    //console.log(rows);
 
                     if (rows && rows.length) {
 
