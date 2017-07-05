@@ -1,0 +1,26 @@
+front:
+  build:
+  ports:
+    - "80:80"
+    - "443:443"
+    - "9000:9000"
+  links:
+    - mysql:mysql
+    - rabbitmq:rabbitmq
+  volumes:
+    - ./www:/var/www
+    - ./sites:/etc/nginx/conf.d
+    - ./logs:/var/log/supervisor
+
+mysql:
+  image: mysql
+  ports:
+    - "3306:3306"
+  environment:
+    MYSQL_ROOT_PASSWORD: password
+
+rabbitmq:
+  image: rabbitmq:3.6.1-management
+  ports:
+    - "15672:15672"
+    - "5672:5672"
