@@ -35,6 +35,9 @@ might dictate some constraints around what's available -- especially when ports 
   
   ![set your content-type](https://github.com/erikyuzwa/microservice-bonanza/blob/master/screenshot.png)
 
+* to view the output of what's been processed by the system so far, use the `reporter` microservice. Point
+your browser or Postman to use `http://servername:port/api/v1/reporter`
+
 # Running the unit tests
 
 * `npm test`
