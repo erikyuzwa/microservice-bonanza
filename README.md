@@ -39,6 +39,52 @@ might dictate some constraints around what's available -- especially when ports 
 
 * `npm test`
 
+# Running and launching the Docker container
+
+**TODO still in progress**
+
+## using docker-compose
+* `docker-compose up` - should work at some point
+
+## using docker-build
+* `docker build -t <your_docker_username>/microservice .` - build the container
+* `docker run -d <your_docker_username>/microservice` - run the Docker container in detached mode
+* `docker stats` - to view the currently running Docker containers
+
+# Architectural Questions
+
+**How would you architect a continuous deployment of micro-services where different versions can co-exist without
+breaking the data integrity?**
+
+Due to the intention of creating a tiny, self-contained "apparatus", different versions of the same microservice
+can co-exist within the same environment with the help of either port range management and/or endpoint url
+management. You'll notice in our microservices that I've put together here, they are by default listening on
+a `api/v1/*` type of route. This can be also managed between different versions of the same microservice.
+
+**How would you architect auto-scalability of micro-services?**
+
+Again due to the self-contained design and approach of a micro-service, common off-the-shelf software such as
+**Docker** and **Ansible** can be used to setup the automated container management that is part of a auto-scalability
+plan / design. 
+
+**When 2 or more instances of same micro-service can co-exist in the same ecosystem, how would you architect the 
+micro-service ecosystem so the data is only processed once?**
+
+This is a tricky scenerio, but very possible given the self-contained and tiny design approach of our micro-services.
+With RabbitMQ handling the messaging, and theoretically our multiple instances all binding/subscribing to the same
+message, we want to ensure we preserve our data integrity. Multiple instances of the service will help ensure some
+type of reliability that the messages we rely on will function despite network blips or interruptions to different
+nodes.
+
+To ensure that data is only updated once is very tough since it's possible that multiple updates on the same record
+ARE actually valid updates intended by the User.
+
+I would have to say that "it depends" on the architecture of the database and microservice. If we're only looking
+at a minor number of similar micro-services (say < 10?) then I'd let each one update the database at will, and
+look at configuring our data store processing to account for multiple similar updates to the same record, only 
+taking in the latest one within a certain threshold of time.
+
+
 # LICENSE
 
 MIT License
