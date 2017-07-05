@@ -6,6 +6,7 @@
  *        rabbit as a "parsedInvoice" message.
  *
  * @TODO: perhaps allow a web endpoint for DEBUG sessions of this service?
+ * @TODO: figure out a way to publish an invalid Model to either Rabbit or maybe a dead letter table..?
  */
 'use strict';
 
@@ -14,6 +15,9 @@ const _ = require('lodash');
 const Path = require('path');
 const YamlConfig = require('node-yaml-config');
 const Config = YamlConfig.load(Path.resolve(__dirname, '../config.yml'));
+
+const validInvoiceKeys = ['documentType', 'documentNumber', 'date', 'amount', 'currency'];
+const validResponseKeys = ['documentType', 'documentNumber', 'originalDocumentNumber', 'status', 'date', 'amount', 'currency'];
 
 // Create a server with a host and port
 const server = new Hapi.Server();
@@ -64,17 +68,39 @@ server.start((err) => {
 	        		messageData = message.data;
 	        		if (_.isObject(messageData)) {
 	        			console.log('[parser] collectedInvoice - ', messageData);
+	        			let validModel = true;
 	        			parsedInvoice = _.pick(messageData, ['date', 'amount', 'currency']);
 	        			if (_.has(messageData, 'responseNumber')) {
 	        				parsedInvoice.documentType = 'Response';
 	        				parsedInvoice.documentNumber = messageData.responseNumber;
 	        				parsedInvoice.originalDocumentNumber = messageData.originalInvoiceNumber;
 	        				parsedInvoice.status = messageData.status;
+
+	        				_.each(validResponseKeys, (v) => {
+
+	        					if (!parsedInvoice[v]) {
+	        						validModel = false;
+						        }
+					        });
+
 			            }
 			            else if (_.has(messageData, 'invoiceNumber')) {
-			                parsedInvoice.documentType = 'Invoice';
-			                parsedInvoice.documentNumber = messageData.invoiceNumber;
-			            }
+					        parsedInvoice.documentType = 'Invoice';
+					        parsedInvoice.documentNumber = messageData.invoiceNumber;
+
+					        _.each(validInvoiceKeys, (v) => {
+
+	        					if (!parsedInvoice[v]) {
+	        						validModel = false;
+						        }
+					        });
+				        }
+
+				        // TODO - play with a way to publish an Error to the Rabbit bus with our invalid model
+				        if (!validModel) {
+	        				console.log('[parser] missing or invalid keys in object - ', parsedInvoice);
+	        				return;
+				        }
 
 			            rabbit.publish(context, 'exchange', 'parsedInvoice', parsedInvoice, (err, data) => {
 

@@ -45,96 +45,96 @@ server.register([
 
 // Add the route
 server.route({
-    method: 'POST',
-    path: Config.api + '/collector',
-    config: {
-        payload: { output: 'data', parse: true, allow: 'application/json' }
-    },
-    handler: (request, reply) => {
+	method: 'POST',
+	path: Config.api + '/collector',
+	config: {
+		payload: { output: 'data', parse: true, allow: 'application/json' }
+	},
+	handler: (request, reply) => {
 
-    	//console.log(request.payload);
-    	const payload = request.payload;
-    	let count = 0;
-    	let status = 'ok';
-    	const rabbit = request.server.plugins['hapi-rabbit'];
+		//console.log(request.payload);
+		const payload = request.payload;
+		let count = 0;
+		let status = 'ok';
+		const rabbit = request.server.plugins['hapi-rabbit'];
 
-    	if (_.isObject(payload) && _.isEmpty(payload)) {
-    		return reply({
-	            'status': status,
-	            'invoices-received': count
-            });
-	    }
+		if (_.isObject(payload) && _.isEmpty(payload)) {
+			return reply({
+				'status': status,
+				'invoices-received': count
+			});
+		}
 
-    	// we should account for either a single JSON being POST'd to our collector
-	    // or an Array of them
-	    if (_.isArray(payload)) {
-	    	_.forOwn(payload, (v, k) => {
+		// we should account for either a single JSON being POST'd to our collector
+		// or an Array of them
+		if (_.isArray(payload)) {
+			_.forOwn(payload, (v, k) => {
 
-	    		// console.log(v);
-    			// beam each one to our parser microservice
-			    if (rabbit) {
-			    	rabbit.createContext((err, context) => {
+				// console.log(v);
+				// beam each one to our parser microservice
+				if (rabbit) {
+					rabbit.createContext((err, context) => {
 
-			    		if (err) {
-			    			throw new Error(err);
-					    }
+						if (err) {
+							throw new Error(err);
+						}
 
-					    rabbit.publish(context, 'exchange', 'collectedInvoice', v, (err, data) => {
+						rabbit.publish(context, 'exchange', 'collectedInvoice', v, (err, data) => {
 
-					    	if (err) {
-					    		throw new Error(err);
-						    }
+							if (err) {
+								throw new Error(err);
+							}
 
-					    	console.log('[publish] messageObject', data);
-					    });
-				    });
-			    }
+							console.log('[publish] messageObject', data);
+						});
+					});
+				}
 
-    			count++;
-		    });
-	    }
-	    else if (_.isObject(payload)) {
+				count++;
+			});
+		}
+		else if (_.isObject(payload)) {
 
-		    // beam each one to our parser microservice
-		    if (rabbit) {
-			    rabbit.createContext((err, context) => {
+			// beam each one to our parser microservice
+			if (rabbit) {
+				rabbit.createContext((err, context) => {
 
-				    if (err) {
-					    throw new Error(err);
-				    }
+					if (err) {
+						throw new Error(err);
+					}
 
-				    rabbit.publish(context, 'exchange', 'collectedInvoice', payload, (err, data) => {
+					rabbit.publish(context, 'exchange', 'collectedInvoice', payload, (err, data) => {
 
-				    	if (err) {
-				    		throw new Error(err);
-					    }
+						if (err) {
+							throw new Error(err);
+						}
 
-					    console.log('[publish] messageObject', data);
-				    });
-			    });
-	        }
+						console.log('[publish] messageObject', data);
+					});
+				});
+			}
 
-	    	count = 1;
-	    }
-	    else {
-	    	status = 'error';
-	    }
+			count = 1;
+		}
+		else {
+			status = 'error';
+		}
 
-        return reply({
-	        'status': status,
-	        'invoices-received': count
-        });
-    }
+		return reply({
+			'status': status,
+			'invoices-received': count
+		});
+	}
 });
 
 // Start the server
 server.start((err) => {
 
-    if (err) {
-        throw err;
-    }
+	if (err) {
+		throw err;
+	}
 
-    console.log('collector microservice running at : ', server.info.uri);
+	console.log('collector microservice running at : ', server.info.uri);
 });
 
 module.exports = server;
